@@ -384,6 +384,15 @@
         </RoutedUICommand.InputGestures>
     </RoutedUICommand>
 
+
+    <RoutedUICommand x:Key="Command.CheckCache"/>
+    <RoutedUICommand x:Key="Command.ClearCache"/>
+    <RoutedUICommand x:Key="Command.BrowseCache"/>
+    <RoutedUICommand x:Key="Command.BrowseLogs"/>
+    <RoutedUICommand x:Key="Command.BrowseFfmpeg"/>
+    <RoutedUICommand x:Key="Command.BrowseGifski"/>
+    <RoutedUICommand x:Key="Command.BrowseSharpDx"/>
+    
     <RoutedUICommand x:Key="Command.CreateLocalSettings" Text="S.Command.CreateLocalSettings">
         <RoutedUICommand.InputGestures>
             <KeyGesture>Ctrl + Alt + C</KeyGesture>
@@ -500,6 +509,5 @@
         </RoutedUICommand.InputGestures>
     </RoutedUICommand>
 
-    <RoutedUICommand x:Key="Command.EnableSnapshot" Text="S.Command.EnableSnapshot"/>
-    <RoutedUICommand x:Key="Command.EnableThinMode" Text="S.Command.EnableThinMode"/>
+    <RoutedUICommand x:Key="Command.SwitchCaptureFrequency" Text="S.Recorder.SwitchFrequency"/>
 </ResourceDictionary>

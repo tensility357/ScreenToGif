@@ -15,14 +15,16 @@ namespace ScreenToGif.Util.Capture
         protected internal IntPtr CompatibleDeviceContext;
         protected internal IntPtr CompatibleBitmap;
         protected internal IntPtr OldBitmap;
-        
+
         protected internal int CursorStep { get; set; }
+
+        protected internal Native.CopyPixelOperation PixelOperation { get; set; }
 
         #endregion
 
-        public override void Start(int delay, int left, int top, int width, int height, double dpi, ProjectInfo project)
+        public override void Start(int delay, int left, int top, int width, int height, double scale, ProjectInfo project)
         {
-            base.Start(delay, left, top, width, height, dpi, project);
+            base.Start(delay, left, top, width, height, scale, project);
 
             #region Pointers
 
@@ -34,6 +36,14 @@ namespace ScreenToGif.Util.Capture
             OldBitmap = Native.SelectObject(CompatibleDeviceContext, CompatibleBitmap);
 
             #endregion
+
+            var pixelOp = Native.CopyPixelOperation.SourceCopy;
+
+            //If not in a remote desktop connection or if the improvement was disabled, capture layered windows too.
+            if (!System.Windows.Forms.SystemInformation.TerminalServerSession || !UserSettings.All.RemoteImprovement)
+                pixelOp |= Native.CopyPixelOperation.CaptureBlt;
+
+            PixelOperation = pixelOp;
         }
 
 
@@ -43,7 +53,8 @@ namespace ScreenToGif.Util.Capture
             {
                 new System.Security.Permissions.UIPermission(System.Security.Permissions.UIPermissionWindow.AllWindows).Demand();
 
-                var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                //var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                var success = Native.StretchBlt(CompatibleDeviceContext, 0, 0, StartWidth, StartHeight, WindowDeviceContext, Left, Top, Width, Height, PixelOperation);
 
                 if (!success)
                     return FrameCount;
@@ -51,7 +62,7 @@ namespace ScreenToGif.Util.Capture
                 //Set frame details.
                 FrameCount++;
                 frame.Path = $"{Project.FullPath}{FrameCount}.png";
-                frame.Delay = FrameRate.GetMilliseconds(SnapDelay);
+                frame.Delay = FrameRate.GetMilliseconds();
                 frame.Image = Image.FromHbitmap(CompatibleBitmap);
 
                 BlockingCollection.Add(frame);
@@ -64,13 +75,19 @@ namespace ScreenToGif.Util.Capture
             return FrameCount;
         }
 
+        public override async Task<int> CaptureAsync(FrameInfo frame)
+        {
+            return await Task.Factory.StartNew(() => Capture(frame));
+        }
+
         public override int CaptureWithCursor(FrameInfo frame)
         {
             try
             {
                 new System.Security.Permissions.UIPermission(System.Security.Permissions.UIPermissionWindow.AllWindows).Demand();
 
-                var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                //var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                var success = Native.StretchBlt(CompatibleDeviceContext, 0, 0, StartWidth, StartHeight, WindowDeviceContext, Left, Top, Width, Height, PixelOperation);
 
                 if (!success)
                     return FrameCount;
@@ -94,6 +111,9 @@ namespace ScreenToGif.Util.Capture
                                 {
                                     frame.CursorX = cursorInfo.ptScreenPos.X - Left;
                                     frame.CursorY = cursorInfo.ptScreenPos.Y - Top;
+
+                                    //(int)(SystemParameters.CursorHeight * Scale)
+                                    //(int)(SystemParameters.CursorHeight * Scale)
 
                                     var ok = Native.DrawIconEx(CompatibleDeviceContext, frame.CursorX - iconInfo.xHotspot, frame.CursorY - iconInfo.yHotspot, cursorInfo.hCursor, 0, 0, CursorStep, IntPtr.Zero, 0x0003);
 
@@ -126,7 +146,7 @@ namespace ScreenToGif.Util.Capture
                 //Set frame details.
                 FrameCount++;
                 frame.Path = $"{Project.FullPath}{FrameCount}.png";
-                frame.Delay = FrameRate.GetMilliseconds(SnapDelay);
+                frame.Delay = FrameRate.GetMilliseconds();
                 frame.Image = Image.FromHbitmap(CompatibleBitmap);
 
                 BlockingCollection.Add(frame);
@@ -139,6 +159,12 @@ namespace ScreenToGif.Util.Capture
             return FrameCount;
         }
 
+        public override async Task<int> CaptureWithCursorAsync(FrameInfo frame)
+        {
+            return await Task.Factory.StartNew(() => CaptureWithCursor(frame));
+        }
+
+
         public override void Save(FrameInfo frame)
         {
             frame.Image.Save(frame.Path);
@@ -148,17 +174,7 @@ namespace ScreenToGif.Util.Capture
             Project.Frames.Add(frame);
         }
 
-        public override async Task<int> CaptureAsync(FrameInfo frame)
-        {
-            return await Task.Factory.StartNew(() => Capture(frame));
-        }
-
-        public override async Task<int> CaptureWithCursorAsync(FrameInfo frame)
-        {
-            return await Task.Factory.StartNew(() => CaptureWithCursor(frame));
-        }
-
-        public override void Stop()
+        public override async Task Stop()
         {
             if (!WasStarted)
                 return;
@@ -175,7 +191,7 @@ namespace ScreenToGif.Util.Capture
                 LogWriter.Log(e, "Impossible to stop and clean resources used by the recording.");
             }
 
-            base.Stop();
+            await base.Stop();
         }
     }
 }

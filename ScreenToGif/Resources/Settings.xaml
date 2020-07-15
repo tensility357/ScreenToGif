@@ -49,16 +49,16 @@
     <!--<s:String x:Key="LatestFeedbackEmail"></s:String>-->
     
     <!--Options • Application-->
+    <s:Boolean x:Key="SingleInstance">True</s:Boolean>
     <s:Boolean x:Key="StartMinimized">False</s:Boolean>
     <s:Int32 x:Key="StartUp">0</s:Int32>
-    <s:Boolean x:Key="NotifyFrameDeletion">True</s:Boolean>
-    <s:Boolean x:Key="NotifyProjectDiscard">True</s:Boolean>
-    <s:Boolean x:Key="NotifyWhileClosingEditor">True</s:Boolean>
     <s:Boolean x:Key="NotifyWhileClosingApp">True</s:Boolean>
-    <s:Boolean x:Key="DrawOutlineOutside">True</s:Boolean>
     <s:Boolean x:Key="DisableHardwareAcceleration">False</s:Boolean>
     <s:Boolean x:Key="CheckForTranslationUpdates">True</s:Boolean>
     <s:Boolean x:Key="CheckForUpdates">True</s:Boolean>
+    <s:Boolean x:Key="ForceUpdateAsAdmin">False</s:Boolean>
+    <s:Boolean x:Key="InstallUpdates">True</s:Boolean>
+    <s:Boolean x:Key="PromptToInstall">True</s:Boolean>
     <s:Boolean x:Key="ShowNotificationIcon">True</s:Boolean>
     <s:Boolean x:Key="KeepOpen">False</s:Boolean>
     <s:Int32 x:Key="LeftClickAction">2</s:Int32>
@@ -67,43 +67,55 @@
     <s:Int32 x:Key="DoubleLeftOpenWindow">2</s:Int32>
     <s:Int32 x:Key="MiddleClickAction">3</s:Int32>
     <s:Int32 x:Key="MiddleOpenWindow">0</s:Int32>
-
+    <s:Boolean x:Key="WorkaroundQuota">True</s:Boolean>
+    
     <!--Options • Recorder-->
     <s:Boolean x:Key="NewRecorder">False</s:Boolean>
+    <s:Boolean x:Key="RecorderThinMode">False</s:Boolean>
+    <s:Boolean x:Key="Magnifier">True</s:Boolean>
+    <s:Boolean x:Key="FallThroughOtherScreens">False</s:Boolean>
+    <u:CaptureFrequency x:Key="CaptureFrequency">PerSecond</u:CaptureFrequency>
+    <s:Int32 x:Key="PlaybackDelayManual">1000</s:Int32>
+    <s:Int32 x:Key="PlaybackDelayMinute">66</s:Int32>
+    <s:Int32 x:Key="PlaybackDelayHour">66</s:Int32>
     <s:Boolean x:Key="UseDesktopDuplication">False</s:Boolean>
     <s:Boolean x:Key="UseMemoryCache">False</s:Boolean>
     <i:CompressionLevel x:Key="CaptureCompression">Optimal</i:CompressionLevel>
     <s:Int32 x:Key="MemoryCacheSize">50</s:Int32>
-    <s:Boolean x:Key="ShowCursor">True</s:Boolean>
-    <s:Boolean x:Key="DetectMouseClicks">True</s:Boolean>
-    <s:Boolean x:Key="UsePreStart">False</s:Boolean>
-    <s:Int32 x:Key="PreStartValue">3</s:Int32>
-    <s:Boolean x:Key="SnapshotMode">False</s:Boolean>
-    <s:Int32 x:Key="SnapshotDefaultDelay">1000</s:Int32>
-    <s:Boolean x:Key="FixedFrameRate">False</s:Boolean>
-    <s:Boolean x:Key="AsyncRecording">False</s:Boolean>
-    <s:Boolean x:Key="Magnifier">True</s:Boolean>
-    <s:Boolean x:Key="CursorFollowing">False</s:Boolean>
-    <s:Int32 x:Key="FollowBuffer">20</s:Int32>
-    <s:Int32 x:Key="FollowBufferInvisible">20</s:Int32>
-
-    <!--Options • Interface-->
     <u:AppTheme x:Key="MainTheme">Light</u:AppTheme>
-    <Rect x:Key="GridSize">0,0,20,20</Rect>
-    <Color x:Key="GridColor1">#FFF5F5F5</Color>
-    <Color x:Key="GridColor2">#FFF0F0F0</Color>
     <Color x:Key="RecorderBackground">#FFFFFFFF</Color>
     <Color x:Key="RecorderForeground">#FF000000</Color>
     <Rect x:Key="BoardGridSize">0,0,20,20</Rect>
     <Color x:Key="BoardGridBackground">#FFFFFFFF</Color>
     <Color x:Key="BoardGridColor1">#FFFFFFFF</Color>
     <Color x:Key="BoardGridColor2">#FFFFFFFF</Color>
+    <s:Boolean x:Key="ShowCursor">True</s:Boolean>
+    <s:Boolean x:Key="DetectMouseClicks">True</s:Boolean>
+    <s:Boolean x:Key="UsePreStart">False</s:Boolean>
+    <s:Int32 x:Key="PreStartValue">3</s:Int32>
+    <s:Boolean x:Key="FixedFrameRate">False</s:Boolean>
+    <s:Boolean x:Key="RemoteImprovement">True</s:Boolean>
+    <s:Boolean x:Key="AsyncRecording">False</s:Boolean>
+    <s:Boolean x:Key="CursorFollowing">False</s:Boolean>
+    <s:Int32 x:Key="FollowBuffer">20</s:Int32>
+    <s:Int32 x:Key="FollowBufferInvisible">20</s:Int32>
+
+    <!--Options • Editor-->
+    <Rect x:Key="GridSize">0,0,20,20</Rect>
+    <Color x:Key="GridColor1">#FFF5F5F5</Color>
+    <Color x:Key="GridColor2">#FFF0F0F0</Color>
+    <s:Boolean x:Key="DisplayEncoder">False</s:Boolean>
     <s:Boolean x:Key="EditorExtendChrome">False</s:Boolean>
-    <s:Boolean x:Key="RecorderThinMode">False</s:Boolean>
-    <s:Boolean x:Key="TripleClickSelection">False</s:Boolean>
     <s:Boolean x:Key="AutomaticallySizeOnContent">False</s:Boolean>
     <s:Boolean x:Key="AutomaticallyFitImage">True</s:Boolean>
-
+    <s:Boolean x:Key="NotifyFrameDeletion">True</s:Boolean>
+    <s:Boolean x:Key="NotifyProjectDiscard">True</s:Boolean>
+    <s:Boolean x:Key="NotifyWhileClosingEditor">True</s:Boolean>
+    <s:Boolean x:Key="TripleClickSelection">False</s:Boolean>
+    <s:Boolean x:Key="DrawOutlineOutside">True</s:Boolean>
+    <s:Boolean x:Key="SetHistoryLimit">True</s:Boolean>
+    <s:Int32 x:Key="HistoryLimit">50</s:Int32>
+    
     <!--Options • Automated Tasks-->
     <c:ArrayList Capacity="1" x:Key="AutomatedTasksList">
         <m:MouseClicksModel ForegroundColor="#78FFFF00" Width="12" Height="12" TaskType="MouseClicks" />
@@ -135,7 +147,7 @@
     <!--Options • Language-->
     <s:String x:Key="LanguageCode">auto</s:String>
 
-    <!--Options • Temporary Files and Extras-->
+    <!--Options • Storage and Extras-->
     <s:String x:Key="LogsFolder">.</s:String>
     <!--<s:String x:Key="TemporaryFolder"></s:String>-->
     <s:Boolean x:Key="AutomaticCleanUp">True</s:Boolean>
@@ -182,7 +194,7 @@
     <!--Editor • Save As-->
     <s:Boolean x:Key="IsSaveTypeExpanded">True</s:Boolean>
     <u:Export x:Key="SaveType">Gif</u:Export>
-    <u:GifEncoderType x:Key="GifEncoder">Legacy</u:GifEncoderType>
+    <u:GifEncoderType x:Key="GifEncoder">ScreenToGif</u:GifEncoderType>
     <u:ApngEncoderType x:Key="ApngEncoder">ScreenToGif</u:ApngEncoderType>
     <u:VideoEncoderType x:Key="VideoEncoder">AviStandalone</u:VideoEncoderType>
     <s:Boolean x:Key="IsGifOptionsExpanded">False</s:Boolean>
@@ -191,19 +203,25 @@
     <s:Boolean x:Key="IsPsdOptionsExpanded">True</s:Boolean>
     <s:Boolean x:Key="IsProjectOptionsExpanded">True</s:Boolean>
     <s:Boolean x:Key="IsSaveOptionsExpanded">True</s:Boolean>
-      
+    <c:ArrayList x:Key="FfmpegPresets">
+        <!--<model:FfmpegPreset Extension=".mp4" Parameters=""/>-->
+    </c:ArrayList>
+    
     <!--Editor • Save As > Gif options-->
-    <s:Int32 x:Key="Quality">10</s:Int32>
+    <u:ColorQuantizationType x:Key="ColorQuantization">Neural</u:ColorQuantizationType>
+    <s:Int32 x:Key="SamplingFactor">5</s:Int32>
     <s:Int32 x:Key="GifskiQuality">50</s:Int32>
     <s:Int32 x:Key="MaximumColors">256</s:Int32>
+    <s:Boolean x:Key="UseGlobalColorTable">False</s:Boolean>
     <s:Boolean x:Key="Looped">True</s:Boolean>
     <s:Boolean x:Key="RepeatForever">True</s:Boolean>
     <s:Int32 x:Key="RepeatCount">2</s:Int32>
-    <u:ColorQuantizationType x:Key="ColorQuantization">Octree</u:ColorQuantizationType>
+    <s:Boolean x:Key="EnableTransparency">false</s:Boolean>
+    <s:Boolean x:Key="SelectTransparencyColor">false</s:Boolean>
+    <Color x:Key="TransparencyColor">#FF000000</Color>
     <s:Boolean x:Key="DetectUnchanged">True</s:Boolean>
     <s:Boolean x:Key="PaintTransparent">True</s:Boolean>
     <Color x:Key="ChromaKey">#FF32CD32</Color>
-    <s:String x:Key="ExtraParametersGif">-lavfi palettegen=stats_mode=diff[pal],[0:v][pal]paletteuse=new=1:diff_mode=rectangle</s:String>
     <!--<s:String x:Key="LatestOutputFolder"></s:String>-->
     <!--<s:String x:Key="LatestFilename"></s:String>-->
     <s:String x:Key="LatestExtension">.gif</s:String>
@@ -225,7 +243,6 @@
     <s:Int32 x:Key="RepeatCountApng">2</s:Int32>
     <s:Boolean x:Key="DetectUnchangedApng">True</s:Boolean>
     <s:Boolean x:Key="PaintTransparentApng">True</s:Boolean>
-    <!--<s:String x:Key="ExtraParametersApngFFmpeg"></s:String>-->
     <!--<s:String x:Key="LatestApngOutputFolder"></s:String>-->
     <!--<s:String x:Key="LatestApngFilename"></s:String>-->
     <s:String x:Key="LatestApngExtension">.png</s:String>
@@ -234,6 +251,8 @@
     <s:Boolean x:Key="PickLocationApng">True</s:Boolean>
     <s:Boolean x:Key="OverwriteOnSaveApng">False</s:Boolean>
     <s:Boolean x:Key="SaveAsProjectTooApng">False</s:Boolean>
+    <s:Boolean x:Key="UploadFileApng">False</s:Boolean>
+    <u:UploadService x:Key="LatestUploadServiceApng">None</u:UploadService>
     <s:Boolean x:Key="SaveToClipboardApng">False</s:Boolean>
     <u:CopyType x:Key="LatestCopyTypeApng">FilePath</u:CopyType>
     <s:Boolean x:Key="ExecuteCustomCommandsApng">False</s:Boolean>
@@ -243,9 +262,6 @@
     <s:Int32 x:Key="AviQuality">5000</s:Int32>
     <s:Boolean x:Key="FlipVideo">True</s:Boolean>
     <s:Int32 x:Key="OutputFramerate">30</s:Int32>
-    <c:ArrayList x:Key="FfmpegPresets">
-        <!--<model:FfmpegPreset Extension=".mp4" Parameters=""/>-->
-    </c:ArrayList>
     <!--<s:String x:Key="LatestVideoOutputFolder"></s:String>-->
     <!--<s:String x:Key="LatestVideoFilename"></s:String>-->
     <s:String x:Key="LatestVideoExtension">.mp4</s:String>
@@ -299,6 +315,8 @@
     <!--Editor • Reduce Frame Count-->
     <s:Int32 x:Key="ReduceFactor">1</s:Int32>
     <s:Int32 x:Key="ReduceCount">1</s:Int32>
+    <u:ReduceDelayType x:Key="ReduceDelay">Evenly</u:ReduceDelayType>
+    <s:Boolean x:Key="ReduceApplyToAll">True</s:Boolean>
     
     <!--Editor • Remove Duplicates-->
     <s:Double x:Key="DuplicatesSimilarity">90</s:Double>
@@ -422,6 +440,11 @@
     <s:Double x:Key="BorderLeftThickness">1.0</s:Double>
     <s:Double x:Key="BorderRightThickness">1.0</s:Double>
     <s:Double x:Key="BorderTopThickness">1.0</s:Double>
+    <!--<Color x:Key="BorderBackgroundColor">#FFFFFFFF</Color>
+    <s:Double x:Key="BorderBottomRadius">0.0</s:Double>
+    <s:Double x:Key="BorderLeftRadius">0.0</s:Double>
+    <s:Double x:Key="BorderRightRadius">0.0</s:Double>
+    <s:Double x:Key="BorderTopRadius">0.0</s:Double>-->
 
     <!--Editor • Shadow-->
     <Color x:Key="ShadowColor">#FF000000</Color>

@@ -4,8 +4,8 @@
              xmlns:c="clr-namespace:ScreenToGif.Util.Converters"
              xmlns:n="clr-namespace:ScreenToGif.Controls"
              xmlns:m="clr-namespace:ScreenToGif.Model"
-             ShutdownMode="OnExplicitShutdown" Startup="Application_Startup" Exit="App_OnExit" 
-             DispatcherUnhandledException="App_OnDispatcherUnhandledException">
+             ShutdownMode="OnExplicitShutdown" Startup="App_Startup" Exit="App_Exit" 
+             DispatcherUnhandledException="App_DispatcherUnhandledException">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -37,6 +37,7 @@
                 <ResourceDictionary Source="/Resources/Localization/StringResources.es.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.fr.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.ja.xaml"/>
+                <ResourceDictionary Source="/Resources/Localization/StringResources.hu.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.ko.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.it.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.nl.xaml"/>
@@ -44,6 +45,7 @@
                 <ResourceDictionary Source="/Resources/Localization/StringResources.pt.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.pt-PT.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.ru.xaml"/>
+                <ResourceDictionary Source="/Resources/Localization/StringResources.sw.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.sv.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.tr.xaml"/>
                 <ResourceDictionary Source="/Resources/Localization/StringResources.uk.xaml"/>
@@ -69,35 +71,11 @@
             <c:EnumToVisibility x:Key="EnumToVisibility"/>
             <c:InvertedBool x:Key="InvertedBool"/>
             <c:CommandToInputGestureText x:Key="CommandToInputGestureText"/>
-
+            <c:EnumToBool x:Key="EnumToBool"/>
+            <c:InvertedEnumToBool x:Key="InvertedEnumToBool"/>
+            
             <!--Effects-->
-            <DropShadowEffect x:Key="Shadow.Black.Tiny" ShadowDepth="0" Color="#FF000000" Opacity=".15" BlurRadius="2" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Black.Small" ShadowDepth="0" Color="#FF000000" Opacity=".2" BlurRadius="2" RenderingBias="Performance"/>
-            <DropShadowEffect x:Key="Shadow.Black" ShadowDepth="0" Color="#FF000000" Opacity="1" BlurRadius="2" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Black.Dark" ShadowDepth="0" Color="#FF000000" Opacity=".5" BlurRadius="2" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Black.Large" ShadowDepth="0" Color="#FF000000" Opacity=".35" BlurRadius="5" RenderingBias="Quality"/>
-
-            <DropShadowEffect x:Key="Shadow.Grey" ShadowDepth="0" Color="#FFBEBEBE" Opacity=".5" BlurRadius="3" RenderingBias="Quality"/>
-
-            <DropShadowEffect x:Key="Shadow.Foreground.Large" ShadowDepth="0" Color="{Binding ForegroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".35" BlurRadius="5" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Foreground" ShadowDepth="0" Color="{Binding ForegroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".35" BlurRadius="3" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Foreground.Normal" ShadowDepth="0" Color="{Binding ForegroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".2" BlurRadius="3" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Foreground.Small" ShadowDepth="0" Color="{Binding ForegroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".2" BlurRadius="2" RenderingBias="Quality"/>
-
-            <DropShadowEffect x:Key="Shadow.Background.Tiny" ShadowDepth="0" Color="{Binding BackgroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".1" BlurRadius="1" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Background.Small" ShadowDepth="0" Color="{Binding BackgroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".2" BlurRadius="2" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Background" ShadowDepth="0" Color="{Binding BackgroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".35" BlurRadius="3" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Background.Large" ShadowDepth="0" Color="{Binding BackgroundColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".35" BlurRadius="5" RenderingBias="Quality"/>
-
-            <DropShadowEffect x:Key="Shadow.Border.Tiny" ShadowDepth="0" Color="{Binding BorderColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".15" BlurRadius="2" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Border.Small" ShadowDepth="0" Color="{Binding BorderColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".2" BlurRadius="3" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Border" ShadowDepth="0" Color="{Binding BorderColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".35" BlurRadius="3" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Border.Large" ShadowDepth="0" Color="{Binding BorderColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".4" BlurRadius="5" RenderingBias="Quality"/>
-            <DropShadowEffect x:Key="Shadow.Border.Dark" ShadowDepth="0" Color="{Binding BorderColor, RelativeSource={RelativeSource TemplatedParent}}" Opacity=".5" BlurRadius="3" RenderingBias="Quality"/>
-
-            <DropShadowEffect x:Key="Glow.Foreground.Large" ShadowDepth="0" Color="WhiteSmoke" Opacity="1" BlurRadius="5" RenderingBias="Quality"/>
             <DropShadowEffect x:Key="Shadow.Invariant" ShadowDepth="0" Color="Transparent" Opacity="0" BlurRadius="0" RenderingBias="Performance"/>
-            <BlurEffect x:Key="Blur" Radius="1" RenderingBias="Quality" KernelType="Gaussian"/>
 
             <!--Notification Icon-->
             <n:NotifyIcon x:Key="NotifyIcon" IconSource="/Resources/Logo.ico" DataContext="{StaticResource AppViewModel}" NotifyToolTipText="ScreenToGif" Visibility="Collapsed" 
@@ -108,8 +86,8 @@
                         <n:ImageMenuItem Header="{DynamicResource S.NewWebcamRecording}" Image="{StaticResource Vector.Camera.New}" Command="{Binding OpenWebcamRecorder}" InputGestureText="{Binding WebcamRecorderGesture, UpdateSourceTrigger=PropertyChanged}"/>
                         <n:ImageMenuItem Header="{DynamicResource S.NewBoardRecording}" Image="{StaticResource Vector.Board.New}" Command="{Binding OpenBoardRecorder}" InputGestureText="{Binding BoardRecorderGesture, UpdateSourceTrigger=PropertyChanged}"/>
                         <Separator/>
-                        <n:ImageMenuItem Header="{DynamicResource Editor}" Image="{StaticResource Vector.Editor}" Command="{Binding OpenEditor}" InputGestureText="{Binding EditorGesture, UpdateSourceTrigger=PropertyChanged}"/>
-                        <n:ImageMenuItem Header="{DynamicResource Options}" Image="{StaticResource Vector.Options}" Command="{Binding OpenOptions}" InputGestureText="{Binding OptionsGesture, UpdateSourceTrigger=PropertyChanged}"/>
+                        <n:ImageMenuItem Header="{DynamicResource S.StartUp.Editor}" Image="{StaticResource Vector.Editor}" Command="{Binding OpenEditor}" InputGestureText="{Binding EditorGesture, UpdateSourceTrigger=PropertyChanged}"/>
+                        <n:ImageMenuItem Header="{DynamicResource S.StartUp.Options}" Image="{StaticResource Vector.Options}" Command="{Binding OpenOptions}" InputGestureText="{Binding OptionsGesture, UpdateSourceTrigger=PropertyChanged}"/>
                         <n:ImageMenuItem Header="{DynamicResource S.Feedback.Feedback}" Image="{StaticResource Vector.Application}" Command="{Binding OpenFeedback}"/>
                         <n:ImageMenuItem Header="{DynamicResource S.Troubleshoot.Title}" Image="{StaticResource Vector.Warning}" Command="{Binding OpenTroubleshoot}"/>
                         <Separator/>
@@ -196,7 +174,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource Element.Foreground.Medium}"/>
                 <Setter Property="MinWidth" Value="20"/>
                 <Setter Property="SnapsToDevicePixels" Value="True"/>
-                <Setter Property="Effect" Value="{DynamicResource Shadow.Grey}"/>
+                <Setter Property="Effect" Value="{DynamicResource Shadow.Border.Dark}"/>
 
                 <Setter Property="Template">
                     <Setter.Value>
@@ -216,7 +194,7 @@
                 <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
                 <Setter Property="Placement" Value="Bottom"/>
                 <Setter Property="HorizontalOffset" Value="-5"/>
-                <Setter Property="Effect" Value="{DynamicResource Shadow.Grey}"/>
+                <Setter Property="Effect" Value="{DynamicResource Shadow.Border.Dark}"/>
                 <Setter Property="Background" Value="{DynamicResource Element.Background}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource Element.Border}"/>
                 <Setter Property="Foreground" Value="{DynamicResource Element.Foreground.Medium}"/>
@@ -454,6 +432,10 @@
 
             <!--ScrollViewer-->
             <Style TargetType="{x:Type ScrollViewer}">
+                <!--<Setter Property="PanningRatio" Value="0.01"/>
+                <Setter Property="PanningDeceleration" Value="0.1"/>
+                <Setter Property="CanContentScroll" Value="True"/>-->
+
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ScrollViewer}">
@@ -817,7 +799,7 @@
 
             <!--ProgressBar-->
             <Style TargetType="{x:Type ProgressBar}">
-                <Setter Property="Foreground" Value="{DynamicResource Brush.ProgressBar.Progress}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Brush.ProgressBar.Primary}"/>
                 <Setter Property="Background" Value="{DynamicResource Element.Background.Back}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource Element.Border}"/>
                 <Setter Property="BorderThickness" Value="1"/>

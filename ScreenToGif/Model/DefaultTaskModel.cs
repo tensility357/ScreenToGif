@@ -24,6 +24,7 @@ namespace ScreenToGif.Model
         }
 
         private TaskTypeEnum _taskType = TaskTypeEnum.NotDeclared;
+        private bool _isEnabled = true;
         private string _image = null;
 
         #endregion
@@ -41,21 +42,27 @@ namespace ScreenToGif.Model
                 switch (TaskType)
                 {
                     case TaskTypeEnum.MouseClicks:
-                        return LocalizationHelper.Get("Editor.Image.Clicks", true);
+                        return LocalizationHelper.Get("S.Editor.Image.Clicks", true);
                     case TaskTypeEnum.KeyStrokes:
-                        return LocalizationHelper.Get("Editor.Image.KeyStrokes", true);
+                        return LocalizationHelper.Get("S.Editor.Image.KeyStrokes", true);
                     case TaskTypeEnum.Delay:
-                        return LocalizationHelper.Get("S.DelayUpdate", true);
+                        return LocalizationHelper.Get("S.Delay.Update", true);
                     case TaskTypeEnum.Progress:
-                        return LocalizationHelper.Get("Editor.Image.Progress", true);
+                        return LocalizationHelper.Get("S.Editor.Image.Progress", true);
                     case TaskTypeEnum.Border:
-                        return LocalizationHelper.Get("Editor.Image.Border", true);
+                        return LocalizationHelper.Get("S.Editor.Image.Border", true);
                     case TaskTypeEnum.Shadow:
-                        return LocalizationHelper.Get("Editor.Image.Shadow", true);
+                        return LocalizationHelper.Get("S.Editor.Image.Shadow", true);
                     default:
                         return LocalizationHelper.Get("S.Options.Tasks.SelectType");
                 }
             }
+        }
+
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set => SetProperty(ref _isEnabled, value);
         }
 
         public string Details => ToString();
@@ -71,7 +78,7 @@ namespace ScreenToGif.Model
 
         public DefaultTaskModel ShallowCopy()
         {
-            return (DefaultTaskModel)MemberwiseClone();
+            return (DefaultTaskModel) MemberwiseClone();
         }
     }
 }

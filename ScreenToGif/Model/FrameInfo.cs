@@ -119,13 +119,13 @@ namespace ScreenToGif.Model
         /// Cursor X position.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
-        public int CursorX { get; set; }
+        public int CursorX { get; set; } = int.MinValue;
 
         /// <summary>
         /// Cursor Y position.
         /// </summary>
         [DataMember(EmitDefaultValue = false)]
-        public int CursorY { get; set; }
+        public int CursorY { get; set; } = int.MinValue;
 
         /// <summary>
         /// True if was clicked.
@@ -169,6 +169,12 @@ namespace ScreenToGif.Model
         /// </summary>
         [IgnoreDataMember]
         public byte[] Data { get; set; }
+
+        /// <summary>
+        /// True if the capture of the frame failed somehow.
+        /// </summary>
+        [IgnoreDataMember]
+        public bool FrameSkipped { get; set; }
 
         /// <summary>
         /// The pixel array data length of the frame.

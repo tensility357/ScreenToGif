@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Net;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,19 +29,39 @@ namespace ScreenToGif
 
         internal static ApplicationViewModel MainViewModel { get; set; }
 
+        private Mutex _mutex;
+        private bool _accepted;
+        private readonly List<Exception> _exceptionList = new List<Exception>();
+        private readonly object _lock = new object();
+
         #endregion
 
         #region Events
 
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private void App_Startup(object sender, StartupEventArgs e)
         {
             Global.StartupDateTime = DateTime.Now;
 
             //Unhandled Exceptions.
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             //Increases the duration of the tooltip display.
             ToolTipService.ShowDurationProperty.OverrideMetadata(typeof(DependencyObject), new FrameworkPropertyMetadata(int.MaxValue));
+            
+            #region Set network connection properties
+
+            try
+            {
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to set the network properties");
+            }
+
+            #endregion
 
             //Parse arguments.
             if (e.Args.Length > 0)
@@ -46,24 +70,100 @@ namespace ScreenToGif
             LocalizationHelper.SelectCulture(UserSettings.All.LanguageCode);
             ThemeHelper.SelectTheme(UserSettings.All.MainTheme.ToString());
 
+            #region If set, it allows only one instance per user
+
+            //The singleton works on a per-user and per-executable mode.
+            //Meaning that a different user and/or a different executable intances can co-exist.
+            //Part of this code wont work on debug mode, since the SetForegroundWindow() needs focus on the foreground window calling the method.
+            if (UserSettings.All.SingleInstance)
+            {
+                try
+                {
+                    using (var thisProcess = Process.GetCurrentProcess())
+                    {
+                        var user = System.Security.Principal.WindowsIdentity.GetCurrent().User;
+                        var name = thisProcess.MainModule?.FileName ?? Assembly.GetEntryAssembly()?.Location ?? "ScreenToGif";
+                        var location = Convert.ToBase64String(Encoding.UTF8.GetBytes(name));
+                        var mutexName = (user?.Value ?? Environment.UserName) + "_" + location;
+
+                        _mutex = new Mutex(true, mutexName, out _accepted);
+
+                        //If the mutext failed to be accepted, it means that another process already openned it.
+                        if (!_accepted)
+                        {
+                            var warning = true;
+
+                            //Switch to the other app (get only one, if multiple available). Use name of assembly.
+                            using (var process = Process.GetProcessesByName(thisProcess.ProcessName).FirstOrDefault(f => f.MainWindowHandle != thisProcess.MainWindowHandle))
+                            {
+                                if (process != null)
+                                {
+                                    var handles = Native.GetWindowHandlesFromProcess(process);
+
+                                    //Show the window before setting focus.
+                                    Native.ShowWindow(handles.Count > 0 ? handles[0] : process.Handle, Native.ShowWindowEnum.Show);
+
+                                    //Set user the focus to the window.
+                                    Native.SetForegroundWindow(handles.Count > 0 ? handles[0] : process.Handle);
+                                    warning = false;
+                                }
+                            }
+
+                            //If no window available (app is in the system tray), display a warning.
+                            if (warning)
+                                Dialog.Ok(LocalizationHelper.Get("S.Warning.Single.Title"), LocalizationHelper.Get("S.Warning.Single.Header"), LocalizationHelper.Get("S.Warning.Single.Message"), Icons.Info);
+
+                            Environment.Exit(0);
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogWriter.Log(ex, "Impossible to check if another instance is running");
+                }
+            }
+
+            #endregion
+
             //Render mode.
             RenderOptions.ProcessRenderMode = UserSettings.All.DisableHardwareAcceleration ? RenderMode.SoftwareOnly : RenderMode.Default;
 
             #region Net Framework
 
-            var array = Type.GetType("System.Array");
-            var method = array?.GetMethod("Empty");
-
-            if (array == null || method == null)
+            if (!FrameworkHelper.HasFramework())
             {
-                var ask = Dialog.Ask("Missing Dependency", "Net Framework 4.6.1 is not present", "In order to properly use this app, you need to download the correct version of the .Net Framework. Open the web page to download?");
+                var ask = Dialog.Ask(LocalizationHelper.Get("S.Warning.Net.Title"), LocalizationHelper.Get("S.Warning.Net.Header"), LocalizationHelper.Get("S.Warning.Net.Message"));
 
                 if (ask)
                 {
-                    Process.Start("https://www.microsoft.com/en-us/download/details.aspx?id=49981");
+                    Process.Start("http://go.microsoft.com/fwlink/?LinkId=2085155");
                     return;
                 }
             }
+
+            #endregion
+
+            #region Set the workaround
+
+            try
+            {
+                if (UserSettings.All.WorkaroundQuota)
+                    BaseCompatibilityPreferences.HandleDispatcherRequestProcessingFailure = BaseCompatibilityPreferences.HandleDispatcherRequestProcessingFailureOptions.Reset;
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to set the workaround for the quota crash");
+            }
+
+            #if DEBUG
+
+            PresentationTraceSources.DataBindingSource.Listeners.Add(new ConsoleTraceListener());
+            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Warning;
+
+            BaseCompatibilityPreferences.HandleDispatcherRequestProcessingFailure = BaseCompatibilityPreferences.HandleDispatcherRequestProcessingFailureOptions.Throw;
+            
+            #endif
 
             #endregion
 
@@ -99,8 +199,8 @@ namespace ScreenToGif
                 //Replace the old option with the new setting.
                 if (UserSettings.All.StartUp == 5)
                 {
-                    UserSettings.All.StartMinimized  = true;
-                    UserSettings.All.ShowNotificationIcon  = true;
+                    UserSettings.All.StartMinimized = true;
+                    UserSettings.All.ShowNotificationIcon = true;
                     UserSettings.All.StartUp = 0;
                 }
 
@@ -124,8 +224,8 @@ namespace ScreenToGif
 
             #region Tasks
 
-            Task.Factory.StartNew(MainViewModel.ClearTemporaryFilesTask, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(MainViewModel.UpdateTask, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(MainViewModel.ClearTemporaryFiles, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(MainViewModel.CheckForUpdates, TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(MainViewModel.SendFeedback, TaskCreationOptions.LongRunning);
 
             #endregion
@@ -166,20 +266,7 @@ namespace ScreenToGif
             #endregion
         }
 
-        private void App_OnExit(object sender, ExitEventArgs e)
-        {
-            //TODO: Use a try catch for each one.
-
-            MutexList.RemoveAll();
-
-            NotifyIcon?.Dispose();
-
-            UserSettings.Save();
-
-            HotKeyCollection.Default.Dispose();
-        }
-
-        private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             LogWriter.Log(e.Exception, "On dispacher unhandled exception - Unknown");
 
@@ -192,8 +279,10 @@ namespace ScreenToGif
                 LogWriter.Log(ex, "Error while displaying the error.");
                 //Ignored.
             }
-
-            e.Handled = true;
+            finally
+            {
+                e.Handled = true;
+            }
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -209,6 +298,89 @@ namespace ScreenToGif
             catch (Exception)
             {
                 //Ignored.
+            }
+        }
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            try
+            {
+                //This is used when trying to load missing assemblies, which are not located in same folder as the main executable.
+
+                var name = args.Name.Split(',').First();
+
+                if (!name.StartsWith("SharpDX"))
+                    return null;
+
+                var path = Other.AdjustPath(UserSettings.All.SharpDxLocationFolder ?? "");
+
+                return Assembly.LoadFrom(System.IO.Path.Combine(path, $"{name}.dll"));
+            }
+            catch (Exception e)
+            {
+                LogWriter.Log(e, "Error loading assemblies");
+                return null;
+            }
+        }
+
+        private void App_Exit(object sender, ExitEventArgs e)
+        {
+            try
+            {
+                MutexList.RemoveAll();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to remove all mutexes of the opened projects.");
+            }
+
+            try
+            {
+                NotifyIcon?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to dispose the system tray icon.");
+            }
+
+            try
+            {
+                EncodingManager.StopAllEncodings();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to cancel all encodings.");
+            }
+
+            try
+            {
+                UserSettings.Save();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to save the user settings.");
+            }
+
+            try
+            {
+                if (_mutex != null && _accepted)
+                {
+                    _mutex.ReleaseMutex();
+                    _accepted = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to release the single instance mutex.");
+            }
+
+            try
+            {
+                HotKeyCollection.Default.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogWriter.Log(ex, "Impossible to dispose the hotkeys.");
             }
         }
 
@@ -250,10 +422,26 @@ namespace ScreenToGif
 
         internal void ShowException(Exception exception)
         {
-            if (Global.IsHotFix4055002Installed && exception is XamlParseException && exception.InnerException is TargetInvocationException)
-                ExceptionDialog.Ok(exception, "ScreenToGif", "Error while rendering visuals", exception.Message);
-            else
-                ExceptionDialog.Ok(exception, "ScreenToGif", "Unhandled exception", exception.Message);
+            lock(_lock)
+            {
+                //Avoid displaying an exception that is already being displayed.
+                if (_exceptionList.Any(a => a.Message == exception.Message))
+                    return;
+
+                //Adding to the list, so a second exception with the same name won't be displayed.
+                _exceptionList.Add(exception);
+
+                Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (Global.IsHotFix4055002Installed && exception is XamlParseException && exception.InnerException is TargetInvocationException)
+                        ExceptionDialog.Ok(exception, "ScreenToGif", "Error while rendering visuals", exception.Message);
+                    else
+                        ExceptionDialog.Ok(exception, "ScreenToGif", "Unhandled exception", exception.Message);
+                }));
+
+                //By removing the exception, the same exception can be displayed later.  
+                _exceptionList.Remove(exception);
+            }
         }
 
         #endregion

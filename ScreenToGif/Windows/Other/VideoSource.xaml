@@ -29,7 +29,7 @@
                      Stretch="Uniform" Child="{StaticResource Vector.FramesFromVideo}" Opacity="{DynamicResource Element.Opacity}"/>
 
             <TextBlock Grid.Column="1" Text="{DynamicResource S.ImportVideo.Title}" Margin="5" VerticalAlignment="Center" Padding="2" FontSize="18" 
-                   FontFamily="Segoe UI Semilight" Effect="{StaticResource Shadow.Foreground.Small}" Foreground="{DynamicResource Element.Foreground.Header}"/>
+                       FontFamily="Segoe UI Semilight" Foreground="{DynamicResource Element.Foreground.Header}"/>
 
             <TextBlock Grid.Column="2" Text="{DynamicResource S.ImportVideo.Importer}" FontSize="13" Foreground="{DynamicResource Element.Foreground.Header}" 
                        TextAlignment="Center" VerticalAlignment="Center" Margin="3"/>
@@ -44,8 +44,7 @@
         <c:StatusBand Grid.Row="1" x:Name="StatusBand"/>
 
         <Label x:Name="LoadingLabel" Grid.Row="2" Content="{DynamicResource S.ImportVideo.Loading}" Margin="0" VerticalContentAlignment="Center" 
-               HorizontalContentAlignment="Center" FontSize="24" Foreground="{DynamicResource Element.Foreground.Header}" FontFamily="Segoe UI Semilight" 
-               Effect="{StaticResource Shadow.Foreground.Small}"/>
+               HorizontalContentAlignment="Center" FontSize="24" Foreground="{DynamicResource Element.Foreground.Header}" FontFamily="Segoe UI Semilight"/>
 
         <Grid Grid.Row="2" x:Name="PreviewerGrid" Margin="5" Opacity="0">
             <Grid.ColumnDefinitions>
@@ -144,13 +143,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Label x:Name="StatusLabel" Content="{DynamicResource InsertFrames.Importing}" Margin="5,0,0,0"
+            <Label x:Name="StatusLabel" Content="{DynamicResource S.InsertFrames.Importing}" Margin="5,0,0,0"
                    Foreground="{DynamicResource Element.Foreground.Medium}" VerticalAlignment="Center" Visibility="Collapsed"/>
             <ProgressBar x:Name="CaptureProgressBar" Grid.Column="1" Height="4" Margin="5,0" Visibility="Collapsed"/>
 
-            <c:ImageButton x:Name="OkButton" Grid.Column="2" Text="{DynamicResource Ok}" Margin="5" IsEnabled="False" MaxSize="20"
+            <c:ImageButton x:Name="OkButton" Grid.Column="2" Text="{DynamicResource S.Ok}" Margin="5" IsEnabled="False" MaxSize="20"
                            MinWidth="90" MinHeight="20" Click="OkButton_Click" Content="{StaticResource Vector.Ok}"/>
-            <c:ImageButton x:Name="CancelButton" Grid.Column="3" Text="{DynamicResource Cancel}" Margin="5" MaxSize="20"
+            <c:ImageButton x:Name="CancelButton" Grid.Column="3" Text="{DynamicResource S.Cancel}" Margin="5" MaxSize="20"
                            MinWidth="90" MinHeight="20" Content="{StaticResource Vector.Cancel}" Click="CancelButton_Click" IsCancel="True"/>
         </Grid>
     </Grid>

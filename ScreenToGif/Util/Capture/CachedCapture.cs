@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using ScreenToGif.Model;
 
 namespace ScreenToGif.Util.Capture
@@ -19,9 +20,9 @@ namespace ScreenToGif.Util.Capture
 
         #endregion
 
-        public override void Start(int delay, int left, int top, int width, int height, double dpi, ProjectInfo project)
+        public override void Start(int delay, int left, int top, int width, int height, double scale, ProjectInfo project)
         {
-            base.Start(delay, left, top, width, height, dpi, project);
+            base.Start(delay, left, top, width, height, scale, project);
 
             _infoHeader = new Native.BitmapInfoHeader();
             _infoHeader.biSize = (uint)Marshal.SizeOf(_infoHeader);
@@ -29,19 +30,20 @@ namespace ScreenToGif.Util.Capture
             _infoHeader.biClrUsed = 0;
             _infoHeader.biClrImportant = 0;
             _infoHeader.biCompression = 0;
-            _infoHeader.biHeight = -Height; //Negative, so the Y-axis will be positioned correctly.
-            _infoHeader.biWidth = Width;
+            _infoHeader.biHeight = -StartHeight; //Negative, so the Y-axis will be positioned correctly.
+            _infoHeader.biWidth = StartWidth;
             _infoHeader.biPlanes = 1;
 
             //This was working with 32 bits: 3L * Width * Height;
-            _byteLength = (Width * _infoHeader.biBitCount + 31) / 32 * 4 * Height;
-            
+            _byteLength = (StartWidth * _infoHeader.biBitCount + 31) / 32 * 4 * StartHeight;
+
+            //Due to a strange behavior with the GetDiBits method while the cursor is IBeam, it's best to use 24 bits, to ignore the alpha values.
             //This capture mode ignores the alpha value.
             project.BitDepth = 24;
 
             _fileStream = new FileStream(project.CachePath, FileMode.Create, FileAccess.Write, FileShare.None);
             _bufferedStream = new BufferedStream(_fileStream, UserSettings.All.MemoryCacheSize * 1048576); //Each 1 MB has 1_048_576 bytes.
-            _compressStream = new DeflateStream(_bufferedStream, UserSettings.All.CaptureCompression);
+            _compressStream = new DeflateStream(_bufferedStream, UserSettings.All.CaptureCompression, true);
         }
 
         public override int Capture(FrameInfo frame)
@@ -50,7 +52,8 @@ namespace ScreenToGif.Util.Capture
             {
                 new System.Security.Permissions.UIPermission(System.Security.Permissions.UIPermissionWindow.AllWindows).Demand();
 
-                var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                //var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                var success = Native.StretchBlt(CompatibleDeviceContext, 0, 0, StartWidth, StartHeight, WindowDeviceContext, Left, Top, Width, Height, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
 
                 if (!success)
                     return FrameCount;
@@ -58,11 +61,12 @@ namespace ScreenToGif.Util.Capture
                 //Set frame details.
                 FrameCount++;
                 frame.Path = $"{Project.FullPath}{FrameCount}.png";
-                frame.Delay = FrameRate.GetMilliseconds(SnapDelay);
+                frame.Delay = FrameRate.GetMilliseconds();
                 frame.DataLength = _byteLength;
                 frame.Data = new byte[_byteLength];
 
-                Native.GetDIBits(WindowDeviceContext, CompatibleBitmap, 0, (uint)Height, frame.Data, ref _infoHeader, Native.DibColorMode.DibRgbColors);
+                if (Native.GetDIBits(WindowDeviceContext, CompatibleBitmap, 0, (uint)StartHeight, frame.Data, ref _infoHeader, Native.DibColorMode.DibRgbColors) == 0)
+                    frame.FrameSkipped = true;
 
                 BlockingCollection.Add(frame);
             }
@@ -80,7 +84,8 @@ namespace ScreenToGif.Util.Capture
             {
                 new System.Security.Permissions.UIPermission(System.Security.Permissions.UIPermissionWindow.AllWindows).Demand();
 
-                var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                //var success = Native.BitBlt(CompatibleDeviceContext, 0, 0, Width, Height, WindowDeviceContext, Left, Top, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
+                var success = Native.StretchBlt(CompatibleDeviceContext, 0, 0, StartWidth, StartHeight, WindowDeviceContext, Left, Top, Width, Height, Native.CopyPixelOperation.SourceCopy | Native.CopyPixelOperation.CaptureBlt);
 
                 if (!success)
                     return FrameCount;
@@ -145,11 +150,12 @@ namespace ScreenToGif.Util.Capture
                 //Set frame details.
                 FrameCount++;
                 frame.Path = $"{Project.FullPath}{FrameCount}.png";
-                frame.Delay = FrameRate.GetMilliseconds(SnapDelay);
+                frame.Delay = FrameRate.GetMilliseconds();
                 frame.DataLength = _byteLength;
                 frame.Data = new byte[_byteLength];
 
-                Native.GetDIBits(WindowDeviceContext, CompatibleBitmap, 0, (uint)Height, frame.Data, ref _infoHeader, Native.DibColorMode.DibRgbColors);
+                if (Native.GetDIBits(WindowDeviceContext, CompatibleBitmap, 0, (uint)StartHeight, frame.Data, ref _infoHeader, Native.DibColorMode.DibRgbColors) == 0)
+                    frame.FrameSkipped = true;
 
                 BlockingCollection.Add(frame);
             }
@@ -163,32 +169,37 @@ namespace ScreenToGif.Util.Capture
 
         public override void Save(FrameInfo info)
         {
-            //Due to a strange behavior with the GetDiBits method while the cursor is IBeam, i have to set back all alpha bits to 255.
-            //if (info.RemoveAnyTransparency)
-            //    for (var i = 3; i < _byteLength; i += 4)
-            //        info.Data[i] = 255;
+            //If the frame skipped, just increase the delay to the previous frame.
+            if (info.FrameSkipped)
+            {
+                info.Data = null;
+                Project.Frames[Project.Frames.Count - 1].Delay += info.Delay;
+                return;
+            }
 
             _compressStream.WriteBytes(info.Data);
-
             info.Data = null;
 
             Project.Frames.Add(info);
         }
 
-        public override void Stop()
+        public override async Task Stop()
         {
             if (!WasStarted)
                 return;
 
-            _compressStream.Flush();
+            //Stop the recording first.
+            await base.Stop();
+
+            //Then close the streams.
+            //_compressStream.Flush();
+            _compressStream.Dispose();
+
             _bufferedStream.Flush();
             _fileStream.Flush();
-
-            _compressStream.Dispose();
+            
             _bufferedStream.Dispose();
             _fileStream.Dispose();
-
-            base.Stop();
         }
 
         [Obsolete("Only for test")]
